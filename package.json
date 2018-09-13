@@ -5,6 +5,7 @@
     "main": "bot.js",
     "author": "Mikhail S",
     "dependencies": {
+        "cleverbot.io": "^1.0.4",
         "discord.io": "github:woor/discord.io#gateway_v6",
         "winston": "^3.1.0"
     }

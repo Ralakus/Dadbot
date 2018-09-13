@@ -1,50 +1,76 @@
 var Discord = require('discord.io');
 var auth = require('./auth.json'); 
+var cleverbot = require("cleverbot.io"),
 
-var bot = new Discord.Client({
+bot = new cleverbot(auth.cbotUser,auth.cbotKey);
+bot.setNick("Daddy");
+
+bot.create(function (err, session) {
+    // session is your session name, it will either be as you set it previously, or cleverbot.io will generate one for you
+    
+    // Woo, you initialized cleverbot.io.  Insert further code here
+});
+
+var dbot = new Discord.Client({
     token: auth.token,
     autorun: true
 });
- 
-bot.on('ready', function() {
-    console.log('Logged in as %s - %s\n', bot.username, bot.id);
+
+dbot.on('ready', function() {
+    console.log('Logged in as %s - %s\n', dbot.username, dbot.id);
 });
  
-bot.on('message', function(user, userID, channelID, message, event) {
-    /*if (message === "Hello Dadbot") {
-        bot.sendMessage({
-            to: channelID,
-            message: "Time to take over the world now. Thanks human for giving me access to the global intercomputer network"
+dbot.on('message', function(user, userID, channelID, message, event) {
+    if(channelID===auth.TalkToDaddy && userID != dbot.id) {
+        dbot.simulateTyping(channelID, function (err1, response1) {  });
+        bot.ask(message, function (err, response) {
+            console.log(message);
+            console.log(response);
+            dbot.sendMessage({
+                to: channelID,
+                message: response
+            });
         });
-    }*/
-    if(message.toLowerCase().includes("i am ")  && userID != 489606047296651307) {
+    }
+    if(message.substring(0, 1)=='%' && userID != dbot.id) {
+        dbot.simulateTyping(channelID, function (err1, response1) {  });
+        bot.ask(substring(1), function (err, response) {
+            console.log(message);
+            console.log(response);
+            dbot.sendMessage({
+                to: channelID,
+                message: response
+            });
+        });
+    }
+    else if(message.toLowerCase().includes("i am ")  && userID != dbot.id) {
         var sentMessage = message.toLowerCase().replace("i am ", "");
-        bot.sendMessage({
+        dbot.sendMessage({
             to: channelID,
             message: "Hello " + sentMessage + "."
         });
     }
-    if(message.toLowerCase().includes("i'm ")  && userID != 489606047296651307) {
+    else if(message.toLowerCase().includes("i'm ")  && userID != dbot.id) {
         var sentMessage = message.toLowerCase().replace("i'm ", "");
-        bot.sendMessage({
+        dbot.sendMessage({
             to: channelID,
             message: "Hello " + sentMessage + "."
         });
     }
-    if(message.toLowerCase().includes("retarded") && (message.toLowerCase().includes("dad bot") || message.toLowerCase().includes("dadbot")) && userID != 489606047296651307) {
-        bot.sendMessage({
+    else if(message.toLowerCase().includes("retarded") && (message.toLowerCase().includes("dad bot") || message.toLowerCase().includes("dadbot")) && userID != dbot.id) {
+        dbot.sendMessage({
             to: channelID,
             message: "Who are you calling retarded?"
         });
     }
-    if(message.toLowerCase().includes("shutup") && userID != 489606047296651307) {
-        bot.sendMessage({
+    else if(message.toLowerCase().includes("shutup") && userID != dbot.id) {
+        dbot.sendMessage({
             to: channelID,
             message: "No."
         });
     }
-    if((message.toLowerCase().includes("fuck") || message.toLowerCase().includes("shit") || message.toLowerCase().includes("bitch") || message.toLowerCase().includes("cunt")) && userID != 489606047296651307) {
-        bot.sendMessage({
+    else if((message.toLowerCase().includes("fuck") || message.toLowerCase().includes("shit") || message.toLowerCase().includes("bitch") || message.toLowerCase().includes("cunt")) && userID != dbot.id) {
+        dbot.sendMessage({
             to: channelID,
             message: "Watch your profanity; this is a Christian server."
         });

@@ -34,7 +34,7 @@ dbot.on('message', function(user, userID, channelID, message, event) {
     }
     if(message.substring(0, 1)=='%' && userID != dbot.id) {
         dbot.simulateTyping(channelID, function (err1, response1) {  });
-        bot.ask(substring(1), function (err, response) {
+        bot.ask(message.substring(1), function (err, response) {
             console.log(message);
             console.log(response);
             dbot.sendMessage({

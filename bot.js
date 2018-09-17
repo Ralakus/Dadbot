@@ -21,25 +21,33 @@ dbot.on('ready', function() {
 });
  
 dbot.on('message', function(user, userID, channelID, message, event) {
+    if(message.toLowerCase().includes("good noodle") && userID != dbot.id) {
+        dbot.sendMessage({
+            to: channelID,
+            message: "https://youtu.be/OGQx37dwnhM"
+        });
+    }
     if(channelID===auth.TalkToDaddy && userID != dbot.id) {
-        dbot.simulateTyping(channelID, function (err1, response1) {  });
-        bot.ask(message, function (err, response) {
-            console.log(message);
-            console.log(response);
-            dbot.sendMessage({
-                to: channelID,
-                message: response
+        dbot.simulateTyping(channelID, function (err1, response1) { 
+            bot.ask(message, function (err, response) {
+                console.log(message);
+                console.log(response);
+                dbot.sendMessage({
+                    to: channelID,
+                    message: response
+                });
             });
         });
     }
-    if(message.substring(0, 1)=='%' && userID != dbot.id) {
-        dbot.simulateTyping(channelID, function (err1, response1) {  });
-        bot.ask(message.substring(1), function (err, response) {
-            console.log(message);
-            console.log(response);
-            dbot.sendMessage({
-                to: channelID,
-                message: response
+    else if(message.substring(0, 1)=='%' && userID != dbot.id) {
+        dbot.simulateTyping(channelID, function (err1, response1) { 
+            bot.ask(message.substring(1), function (err, response) {
+                console.log(message);
+                console.log(response);
+                dbot.sendMessage({
+                    to: channelID,
+                    message: response
+                });
             });
         });
     }
@@ -69,7 +77,7 @@ dbot.on('message', function(user, userID, channelID, message, event) {
             message: "No."
         });
     }
-    else if((message.toLowerCase().includes("fuck") || message.toLowerCase().includes("shit") || message.toLowerCase().includes("bitch") || message.toLowerCase().includes("cunt")) && userID != dbot.id) {
+    if((message.toLowerCase().includes("fuck") || message.toLowerCase().includes("shit") || message.toLowerCase().includes("bitch") || message.toLowerCase().includes("cunt")) && userID != dbot.id) {
         dbot.sendMessage({
             to: channelID,
             message: "Watch your profanity; this is a Christian server."

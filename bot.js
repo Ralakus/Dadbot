@@ -51,15 +51,22 @@ dbot.on('message', function(user, userID, channelID, message, event) {
             });
         });
     }
-    else if(message.toLowerCase().includes("i am ")  && userID != dbot.id) {
-        var sentMessage = message.toLowerCase().replace("i am ", "");
+    else if(message.toLowerCase().startsWith("i am ")  && userID != dbot.id) {
+        var sentMessage = message.substring(4);
         dbot.sendMessage({
             to: channelID,
             message: "Hello " + sentMessage + "."
         });
     }
-    else if(message.toLowerCase().includes("i'm ")  && userID != dbot.id) {
-        var sentMessage = message.toLowerCase().replace("i'm ", "");
+    else if(message.toLowerCase().startsWith("i'm ")  && userID != dbot.id) {
+        var sentMessage = message.substring(3);
+        dbot.sendMessage({
+            to: channelID,
+            message: "Hello " + sentMessage + "."
+        });
+    }
+    else if(message.toLowerCase().startsWith("im ")  && userID != dbot.id) {
+        var sentMessage = message.substring(2);
         dbot.sendMessage({
             to: channelID,
             message: "Hello " + sentMessage + "."

@@ -52,21 +52,21 @@ dbot.on('message', function(user, userID, channelID, message, event) {
         });
     }
     else if(message.toLowerCase().startsWith("i am ")  && userID != dbot.id) {
-        var sentMessage = message.substring(4);
+        var sentMessage = message.substring(5);
         dbot.sendMessage({
             to: channelID,
             message: "Hello " + sentMessage + "."
         });
     }
     else if(message.toLowerCase().startsWith("i'm ")  && userID != dbot.id) {
-        var sentMessage = message.substring(3);
+        var sentMessage = message.substring(4);
         dbot.sendMessage({
             to: channelID,
             message: "Hello " + sentMessage + "."
         });
     }
     else if(message.toLowerCase().startsWith("im ")  && userID != dbot.id) {
-        var sentMessage = message.substring(2);
+        var sentMessage = message.substring(3);
         dbot.sendMessage({
             to: channelID,
             message: "Hello " + sentMessage + "."
@@ -84,10 +84,10 @@ dbot.on('message', function(user, userID, channelID, message, event) {
             message: "No."
         });
     }
-    if((message.toLowerCase().includes("fuck") || message.toLowerCase().includes("shit") || message.toLowerCase().includes("bitch") || message.toLowerCase().includes("cunt")) && userID != dbot.id) {
+    /*if((message.toLowerCase().includes("fuck") || message.toLowerCase().includes("shit") || message.toLowerCase().includes("bitch") || message.toLowerCase().includes("cunt")) && userID != dbot.id) {
         dbot.sendMessage({
             to: channelID,
             message: "Watch your profanity; this is a Christian server."
         });
-    }
+    }*/
 });

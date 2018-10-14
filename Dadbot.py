@@ -3,7 +3,7 @@ from discord.ext import commands
 import asyncio
 import configparser
 
-bot = commands.Bot(command_prefix='>', description='Daddy')
+bot = commands.Bot(command_prefix=commands.when_mentioned_or('>'), description='Daddy')
 
 listen_channels  = []
 talk_to_channels = []
@@ -73,64 +73,64 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     if message.content.lower().startswith("i'm"):
-        await bot.say("Hello " + message.content[4:])
+        await message.channel.send("Hello " + message.content[4:])
     elif message.content.lower().startswith("im"):
-        await bot.say("Hello " + message.content[3:])
+        await message.channel.send("Hello " + message.content[3:])
     elif message.content.lower().startswith("i am"):
-        await bot.say("Hello " + message.content[5:])
+        await message.channel.send("Hello " + message.content[5:])
     else:
         return
 
-@bot.command
-async def joined(member: discord.Member):
-    await bot.say('{0.name} joined in {0.joined_at}'.format(member))
+@bot.command()
+async def joined(ctx, member: discord.Member):
+    await ctx.send('{0.name} joined in {0.joined_at}'.format(member))
 
 @bot.command(name="listen")
-async def add_listen_channel(channel: discord.Channel):
+async def add_listen_channel(ctx, channel: discord.TextChannel):
     print("recv")
     for chan_id in listen_channels:
         if chan_id == channel.id:
             print("already listening to channel %s!" % channel.name)
-            await bot.say("already listening to channel %s!" % channel.name)
+            await ctx.send("already listening to channel %s!" % channel.name)
             return
     listen_channels.append(channel.id)
     config_add_to_listen_channels(channel.id)
     print("listening to channel %s" % channel.name)
-    await bot.say("listening to channel %s" % channel.name)
+    await ctx.send("listening to channel %s" % channel.name)
     
 @bot.command(name="ignore")
-async def remove_listen_channel(channel: discord.Channel):
+async def remove_listen_channel(ctx, channel: discord.TextChannel):
     for chan_id in listen_channels:
         if chan_id == channel.id:
             config_remove_listen_channel(channel.id)
             listen_channels.remove(channel.id)
             print("ignoring channel %s" % channel.name)
-            await bot.say("ignoring channel %s" % channel.name)
+            await ctx.send("ignoring channel %s" % channel.name)
             return
     print("not listening to channel %s!" % channel.name)
-    await bot.say("not listening to channel %s!" % channel.name)
+    await ctx.send("not listening to channel %s!" % channel.name)
 
 @bot.command(name="addtalk")
-async def add_talk_room(channel: discord.Channel):
+async def add_talk_room(ctx, channel: discord.TextChannel):
     for chan_id in talk_to_channels:
         if chan_id == channel.id:
             print("channel %s is already a talk room!" % channel.name)
-            await bot.say("channel %s is already a talk room!" % channel.name)
+            await ctx.send("channel %s is already a talk room!" % channel.name)
             return
     talk_to_channels.append(channel.id)
     print("channel %s added as talk room" % channel.name)
-    await bot.say("channel %s added as talk room" % channel.name)
+    await ctx.send("channel %s added as talk room" % channel.name)
 
 @bot.command(name="ignoretalk")
-async def remove_talk_room(channel: discord.Channel):
+async def remove_talk_room(ctx, channel: discord.TextChannel):
     for chan_id in talk_to_channels:
         if chan_id == channel.id:
             talk_to_channels.remove(channel.id)
             config_remove_talk_channels(channel.id)
             print("talk channel %s is being ignored" % channel.name)
-            await bot.say("talk channel %s is being ignored" % channel.name)
+            await ctx.send("talk channel %s is being ignored" % channel.name)
             return
     print("channel %s is not a talk room!" % channel.name)
-    await bot.say("channel %s is not a talk room!" % channel.name)
+    await ctx.send("channel %s is not a talk room!" % channel.name)
 
 bot.run(config_section_map(auth, "DiscordAPI")["token"])

@@ -3,7 +3,7 @@ from discord.ext import commands
 import asyncio
 import configparser
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or('>'), description='Daddy')
+client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), description='Daddy')
 
 listen_channels  = []
 talk_to_channels = []
@@ -28,66 +28,87 @@ auth = configparser.ConfigParser()
 auth.read(config_section_map(bot_config, "Config")["auth"])
 
 def config_add_to_listen_channels(id):
-    count = config_section_map(bot_config, "ListenChannels")["count"]
-    bot_config.set("ListenChannels", str(count+1), id)
-    bot_config.set("ListenChannels", "count", count+1)
+    count = int(config_section_map(bot_config, "ListenChannels")["count"])
+    bot_config.set("ListenChannels", str(count), str(id))
+    bot_config.set("ListenChannels", "count", str(count+1))
+    with open("res/config.ini", "w") as configfile:
+        bot_config.write(configfile)
 
 def config_remove_listen_channel(id):
-    count = config_section_map(bot_config, "ListenChannels")["count"]
+    count = int(config_section_map(bot_config, "ListenChannels")["count"])
     id_index = None
     for i in range(count):
-        if config_section_map(bot_config, "ListenChannels")[str(i)] == id:
+        if int(config_section_map(bot_config, "ListenChannels")[str(i)]) == id:
             id_index = i
-            bot_config.remove_option("ListenChannels", str(i))
     if id_index == None:
-        print("channel %s not found!" % id)
+        print("channel %s not found!" % str(id))
         return
-    for i in range(id_index + 1, count - 1):
+    for i in range(id_index, count - 1):
         bot_config.set("ListenChannels", str(i), config_section_map(bot_config, "ListenChannels")[str(i+1)])
+    bot_config.remove_option("ListenChannels", str(count-1))
+    bot_config.set("ListenChannels", "count", str(count-1))
+    with open("res/config.ini", "w") as configfile:
+        bot_config.write(configfile)
 
 def config_add_to_talk_channels(id):
-    count = config_section_map(bot_config, "TalkChannels")["count"]
-    bot_config.set("TalkChannels", str(count+1), id)
-    bot_config.set("TalkChannels", "count", count+1)
+    count = int(config_section_map(bot_config, "TalkChannels")["count"])
+    bot_config.set("TalkChannels", str(count), str(id))
+    bot_config.set("TalkChannels", "count", str(count+1))
+    with open("res/config.ini", "w") as configfile:
+        bot_config.write(configfile)
 
 def config_remove_talk_channels(id):
-    count = config_section_map(bot_config, "TalkChannels")["count"]
+    count = int(config_section_map(bot_config, "TalkChannels")["count"])
     id_index = None
     for i in range(count):
-        if config_section_map(bot_config, "TalkChannels")[str(i)] == id:
+        if int(config_section_map(bot_config, "TalkChannels")[str(i)]) == id:
             id_index = i
-            bot_config.remove_option("TalkChannels", str(i))
     if id_index == None:
-        print("channel %s not found!" % id)
+        print("channel %s not found!" % str(id))
         return
-    for i in range(id_index + 1, count - 1):
+    for i in range(id_index, count - 1):
         bot_config.set("TalkChannels", str(i), config_section_map(bot_config, "TalkChannels")[str(i+1)])
+    bot_config.remove_option("TalkChannels", str(count-1))
+    bot_config.set("TalkChannels", "count", str(count-1))
+    with open("res/config.ini", "w") as configfile:
+        bot_config.write(configfile)
 
-@bot.event
+@client.event
 async def on_ready():
     print("Logged in as:")
-    print(bot.user.name)
-    print(bot.user.id)
+    print(client.user.name)
+    print(client.user.id)
     print("------")
 
-@bot.event
+@client.event
 async def on_message(message):
-    if message.content.lower().startswith("i'm"):
-        await message.channel.send("Hello " + message.content[4:])
-    elif message.content.lower().startswith("im"):
-        await message.channel.send("Hello " + message.content[3:])
-    elif message.content.lower().startswith("i am"):
-        await message.channel.send("Hello " + message.content[5:])
-    else:
-        return
+    for channel in listen_channels:
+        if channel == message.channel.id:
+            if message.content.lower().startswith("i'm"):
+                await message.channel.send("Hello " + message.content[4:])
+            elif message.content.lower().startswith("im"):
+                await message.channel.send("Hello " + message.content[3:])
+            elif message.content.lower().startswith("i am"):
+                await message.channel.send("Hello " + message.content[5:])
 
-@bot.command()
+    for channel in talk_to_channels:
+        if channel == message.channel.id:
+            if message.content.lower().startswith("i'm"):
+                await message.channel.send("Hello " + message.content[4:])
+            elif message.content.lower().startswith("im"):
+                await message.channel.send("Hello " + message.content[3:])
+            elif message.content.lower().startswith("i am"):
+                await message.channel.send("Hello " + message.content[5:])
+
+    
+    await client.process_commands(message)
+
+@client.command()
 async def joined(ctx, member: discord.Member):
     await ctx.send('{0.name} joined in {0.joined_at}'.format(member))
 
-@bot.command(name="listen")
+@client.command(name="listen")
 async def add_listen_channel(ctx, channel: discord.TextChannel):
-    print("recv")
     for chan_id in listen_channels:
         if chan_id == channel.id:
             print("already listening to channel %s!" % channel.name)
@@ -98,7 +119,7 @@ async def add_listen_channel(ctx, channel: discord.TextChannel):
     print("listening to channel %s" % channel.name)
     await ctx.send("listening to channel %s" % channel.name)
     
-@bot.command(name="ignore")
+@client.command(name="ignore")
 async def remove_listen_channel(ctx, channel: discord.TextChannel):
     for chan_id in listen_channels:
         if chan_id == channel.id:
@@ -110,7 +131,7 @@ async def remove_listen_channel(ctx, channel: discord.TextChannel):
     print("not listening to channel %s!" % channel.name)
     await ctx.send("not listening to channel %s!" % channel.name)
 
-@bot.command(name="addtalk")
+@client.command(name="addtalk")
 async def add_talk_room(ctx, channel: discord.TextChannel):
     for chan_id in talk_to_channels:
         if chan_id == channel.id:
@@ -121,7 +142,7 @@ async def add_talk_room(ctx, channel: discord.TextChannel):
     print("channel %s added as talk room" % channel.name)
     await ctx.send("channel %s added as talk room" % channel.name)
 
-@bot.command(name="ignoretalk")
+@client.command(name="ignoretalk")
 async def remove_talk_room(ctx, channel: discord.TextChannel):
     for chan_id in talk_to_channels:
         if chan_id == channel.id:
@@ -133,4 +154,15 @@ async def remove_talk_room(ctx, channel: discord.TextChannel):
     print("channel %s is not a talk room!" % channel.name)
     await ctx.send("channel %s is not a talk room!" % channel.name)
 
-bot.run(config_section_map(auth, "DiscordAPI")["token"])
+def load_config():
+    listen_count  = int(config_section_map(bot_config, "ListenChannels")["count"])
+    talk_to_count = int(config_section_map(bot_config, "TalkChannels")["count"])
+
+    for i in range(listen_count):
+        listen_channels.append(int(config_section_map(bot_config, "ListenChannels")[str(i)]))
+
+    for i in range(talk_to_count):
+        talk_to_channels.append(int(config_section_map(bot_config, "TalkChannels")[str(i)]))
+
+load_config()
+client.run(config_section_map(auth, "DiscordAPI")["token"])

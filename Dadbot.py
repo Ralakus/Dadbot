@@ -3,7 +3,17 @@ from discord.ext import commands
 import asyncio
 import configparser
 
+from chatterbot import ChatBot
+from chatterbot.trainers import ChatterBotCorpusTrainer
+from chatterbot.trainers import ListTrainer
+
 client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), description='Daddy')
+chatbot = ChatBot("Daddy")
+
+corpustrainer = ChatterBotCorpusTrainer(chatbot)
+corpustrainer.train("chatterbot.corpus.english")
+
+listtrainer = ListTrainer(chatbot)
 
 listen_channels  = []
 talk_to_channels = []
@@ -82,26 +92,30 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    for channel in listen_channels:
-        if channel == message.channel.id:
-            if message.content.lower().startswith("i'm"):
-                await message.channel.send("Hello " + message.content[4:])
-            elif message.content.lower().startswith("im"):
-                await message.channel.send("Hello " + message.content[3:])
-            elif message.content.lower().startswith("i am"):
-                await message.channel.send("Hello " + message.content[5:])
+    if message.author.id != client.user.id:
+        for channel in listen_channels:
+            if channel == message.channel.id:
+                if message.content.lower().startswith("i'm"):
+                    await message.channel.send("Hello " + message.content[4:])
+                elif message.content.lower().startswith("im"):
+                    await message.channel.send("Hello " + message.content[3:])
+                elif message.content.lower().startswith("i am"):
+                    await message.channel.send("Hello " + message.content[5:])
+                listtrainer.train([message.content])
 
-    for channel in talk_to_channels:
-        if channel == message.channel.id:
-            if message.content.lower().startswith("i'm"):
-                await message.channel.send("Hello " + message.content[4:])
-            elif message.content.lower().startswith("im"):
-                await message.channel.send("Hello " + message.content[3:])
-            elif message.content.lower().startswith("i am"):
-                await message.channel.send("Hello " + message.content[5:])
+        for channel in talk_to_channels:
+            if channel == message.channel.id:
+                if message.content.lower().startswith("i'm"):
+                    await message.channel.send("Hello " + message.content[4:])
+                elif message.content.lower().startswith("im"):
+                    await message.channel.send("Hello " + message.content[3:])
+                elif message.content.lower().startswith("i am"):
+                    await message.channel.send("Hello " + message.content[5:])
+                async with message.channel.typing():
+                    await message.channel.send(chatbot.get_response(message.content))
 
-    
-    await client.process_commands(message)
+        
+        await client.process_commands(message)
 
 @client.command()
 async def joined(ctx, member: discord.Member):
@@ -131,7 +145,7 @@ async def remove_listen_channel(ctx, channel: discord.TextChannel):
     print("not listening to channel %s!" % channel.name)
     await ctx.send("not listening to channel %s!" % channel.name)
 
-@client.command(name="addtalk")
+@client.command(name="listentalk")
 async def add_talk_room(ctx, channel: discord.TextChannel):
     for chan_id in talk_to_channels:
         if chan_id == channel.id:
@@ -139,6 +153,7 @@ async def add_talk_room(ctx, channel: discord.TextChannel):
             await ctx.send("channel %s is already a talk room!" % channel.name)
             return
     talk_to_channels.append(channel.id)
+    config_add_to_talk_channels(channel.id)
     print("channel %s added as talk room" % channel.name)
     await ctx.send("channel %s added as talk room" % channel.name)
 

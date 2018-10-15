@@ -18,7 +18,7 @@ listtrainer = ListTrainer(chatbot)
 listen_channels  = []
 talk_to_channels = []
 
-training_buffer_max_size: int = 10
+training_buffer_max_size = 10
 training_buffer  = []
 
 def config_section_map(config, section: str):

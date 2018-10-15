@@ -18,6 +18,9 @@ listtrainer = ListTrainer(chatbot)
 listen_channels  = []
 talk_to_channels = []
 
+training_buffer_max_size: int = 10
+training_buffer  = []
+
 def config_section_map(config, section: str):
     dict1 = {}
     options = config.options(section)
@@ -101,7 +104,11 @@ async def on_message(message):
                     await message.channel.send("Hello " + message.content[3:])
                 elif message.content.lower().startswith("i am"):
                     await message.channel.send("Hello " + message.content[5:])
-                listtrainer.train([message.content])
+                training_buffer.append(message.content)
+                if len(training_buffer) >= training_buffer_max_size:
+                    listtrainer.train(training_buffer)
+                    training_buffer.clear()
+
 
         for channel in talk_to_channels:
             if channel == message.channel.id:

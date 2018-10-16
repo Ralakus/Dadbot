@@ -6,12 +6,16 @@ import configparser
 from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
 from chatterbot.trainers import ListTrainer
+from chatterbot.trainers import UbuntuCorpusTrainer
 
 client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), description='Daddy')
 chatbot = ChatBot("Daddy")
 
 corpustrainer = ChatterBotCorpusTrainer(chatbot)
 corpustrainer.train("chatterbot.corpus.english")
+
+ucorpustrainer = UbuntuCorpusTrainer(chatbot)
+ucorpustrainer.train()
 
 listtrainer = ListTrainer(chatbot)
 

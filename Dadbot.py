@@ -14,9 +14,6 @@ chatbot = ChatBot("Daddy")
 corpustrainer = ChatterBotCorpusTrainer(chatbot)
 corpustrainer.train("chatterbot.corpus.english")
 
-ucorpustrainer = UbuntuCorpusTrainer(chatbot)
-ucorpustrainer.train()
-
 listtrainer = ListTrainer(chatbot)
 
 listen_channels  = []

@@ -128,10 +128,6 @@ async def on_message(message):
         except Exception as e:
             await message.channel.send(str(e))
 
-@bot.event
-async def on_error(event, *args, **kwargs):
-    pass
-
 @client.command()
 async def joined(ctx, member: discord.Member):
     await ctx.send('{0.name} joined in {0.joined_at}'.format(member))

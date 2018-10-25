@@ -29,9 +29,10 @@ def config_section_map(config, section: str):
         try:
             dict1[option] = config.get(section, option)
             if dict1[option] == -1:
-                print("skip: %s" % option)
+                #print("skip: %s" % option)
+                pass
         except:
-            print("exception on %s!" % option)
+            #print("exception on %s!" % option)
             dict1[option] = None
     return dict1
 
@@ -55,7 +56,7 @@ def config_remove_listen_channel(id):
         if int(config_section_map(bot_config, "ListenChannels")[str(i)]) == id:
             id_index = i
     if id_index == None:
-        print("channel %s not found!" % str(id))
+        #print("channel %s not found!" % str(id))
         return
     for i in range(id_index, count - 1):
         bot_config.set("ListenChannels", str(i), config_section_map(bot_config, "ListenChannels")[str(i+1)])
@@ -78,7 +79,7 @@ def config_remove_talk_channels(id):
         if int(config_section_map(bot_config, "TalkChannels")[str(i)]) == id:
             id_index = i
     if id_index == None:
-        print("channel %s not found!" % str(id))
+        #print("channel %s not found!" % str(id))
         return
     for i in range(id_index, count - 1):
         bot_config.set("TalkChannels", str(i), config_section_map(bot_config, "TalkChannels")[str(i+1)])
@@ -122,8 +123,10 @@ async def on_message(message):
                 async with message.channel.typing():
                     await message.channel.send(chatbot.get_response(message.content))
 
-        
-        await client.process_commands(message)
+        try:
+            await client.process_commands(message)
+        except Exception as e:
+            await message.channel.send(str(e))
 
 @client.command()
 async def joined(ctx, member: discord.Member):
@@ -133,12 +136,12 @@ async def joined(ctx, member: discord.Member):
 async def add_listen_channel(ctx, channel: discord.TextChannel):
     for chan_id in listen_channels:
         if chan_id == channel.id:
-            print("already listening to channel %s!" % channel.name)
+            #print("already listening to channel %s!" % channel.name)
             await ctx.send("already listening to channel %s!" % channel.name)
             return
     listen_channels.append(channel.id)
     config_add_to_listen_channels(channel.id)
-    print("listening to channel %s" % channel.name)
+    #print("listening to channel %s" % channel.name)
     await ctx.send("listening to channel %s" % channel.name)
     
 @client.command(name="ignore")
@@ -147,22 +150,22 @@ async def remove_listen_channel(ctx, channel: discord.TextChannel):
         if chan_id == channel.id:
             config_remove_listen_channel(channel.id)
             listen_channels.remove(channel.id)
-            print("ignoring channel %s" % channel.name)
+            #print("ignoring channel %s" % channel.name)
             await ctx.send("ignoring channel %s" % channel.name)
             return
-    print("not listening to channel %s!" % channel.name)
+    #print("not listening to channel %s!" % channel.name)
     await ctx.send("not listening to channel %s!" % channel.name)
 
 @client.command(name="listentalk")
 async def add_talk_room(ctx, channel: discord.TextChannel):
     for chan_id in talk_to_channels:
         if chan_id == channel.id:
-            print("channel %s is already a talk room!" % channel.name)
+            #print("channel %s is already a talk room!" % channel.name)
             await ctx.send("channel %s is already a talk room!" % channel.name)
             return
     talk_to_channels.append(channel.id)
     config_add_to_talk_channels(channel.id)
-    print("channel %s added as talk room" % channel.name)
+    #print("channel %s added as talk room" % channel.name)
     await ctx.send("channel %s added as talk room" % channel.name)
 
 @client.command(name="ignoretalk")
@@ -171,10 +174,10 @@ async def remove_talk_room(ctx, channel: discord.TextChannel):
         if chan_id == channel.id:
             talk_to_channels.remove(channel.id)
             config_remove_talk_channels(channel.id)
-            print("talk channel %s is being ignored" % channel.name)
+            #print("talk channel %s is being ignored" % channel.name)
             await ctx.send("talk channel %s is being ignored" % channel.name)
             return
-    print("channel %s is not a talk room!" % channel.name)
+    #print("channel %s is not a talk room!" % channel.name)
     await ctx.send("channel %s is not a talk room!" % channel.name)
 
 def load_config():

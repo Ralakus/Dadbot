@@ -5,8 +5,7 @@ COPY . .
 EXPOSE 80
 
 RUN apt-get update
-RUN apt-get install build-essential -y
-RUN apt-get install python3-dev -y
+RUN apt-get install build-essential libopenblas-dev python3-dev -y
 
 RUN pip install --no-cache-dir -r requirements.txt
 

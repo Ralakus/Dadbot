@@ -1,1 +1,4 @@
-res/auth.ini
+dadbot.hcl
+push
+bot/target
+bot/Cargo.lock

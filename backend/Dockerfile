@@ -1,9 +1,10 @@
-FROM python:3-alpine
+FROM python:3-buster
 
 WORKDIR /usr/src/app
 COPY . .
 EXPOSE 80
 
+RUN apt-get update
 RUN apt-get install build-essential -y
 RUN apt-get install python3-dev -y
 

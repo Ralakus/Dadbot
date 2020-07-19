@@ -1,5 +1,12 @@
-FROM debian:latest
+FROM rust:stretch
 
-COPY target/release/dadbot /dadbot
+WORKDIR /lab/
 
-ENTRYPOINT [ "/dadbot" ]
+COPY . .
+
+RUN apt-get update
+RUN apt-get install openssl -y
+
+RUN cargo install --path .
+
+CMD [ "dadbot" ]

@@ -13,7 +13,7 @@ use tokio::runtime::Runtime;
 
 
 const TALK_CHANNEL_ID: u64 = 489913156165042177;
-const BACKEND_URL: &str = "http://localhost:8080";
+const BACKEND_URL: &str = "http://backend:80";
 
 fn request_response(message: String) -> Result<String, String> {
     let mut rt = match Runtime::new() {

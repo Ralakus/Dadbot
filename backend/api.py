@@ -3,7 +3,7 @@ import bot
 
 class DadbotAPI:
     def on_post(self, req, resp):
-        body = req.stream.read()
+        body = req.stream.read().decode("utf-8")
         resp.body = str(bot.chatbot.get_response(str(body)))
     def on_get(self, req, resp):
         resp.body = "Please post a request"

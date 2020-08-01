@@ -1,9 +1,3 @@
-dadbot.hcl
 push
-
-bot/target
-bot/Cargo.lock
-
-backend/db.sqlite3
-backend/__pycache__
-backend/sentence_tokenizer.pickle
+target
+Cargo.lock

@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-cd bot
-cargo build --release
-cd ..
-
 BOT_TAG=dadbot
-BACKEND_TAG=dadbot-backend
 
-docker build -t $BOT_TAG bot
-docker build -t $BACKEND_TAG backend
+docker build -t $BOT_TAG .

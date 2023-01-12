@@ -1,0 +1,3 @@
+[submodule "res/gpt-neo-350M"]
+	path = res/gpt-neo-350M
+	url = https://huggingface.co/xhyi/PT_GPTNEO350_ATG

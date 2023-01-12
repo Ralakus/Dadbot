@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-BOT_TAG=dadbot
-
-docker build -t $BOT_TAG .

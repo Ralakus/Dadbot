@@ -96,6 +96,8 @@ impl EventHandler for Handler {
                 }
             }
             _ if self.config.listen_channels.contains(&msg.channel_id.0) => {
+                let _ = msg.channel_id.broadcast_typing(&ctx.http).await;
+
                 let name = msg
                     .author_nick(&ctx.http)
                     .await

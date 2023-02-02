@@ -1,4 +1,5 @@
 {
+    "backend_url": "http://[::]:50051",
     "listen_channels": [
         1060930430146203648
     ]

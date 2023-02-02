@@ -1,1 +1,3 @@
+.vscode/
 target
+server/__pycache__

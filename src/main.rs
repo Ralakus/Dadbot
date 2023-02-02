@@ -6,10 +6,15 @@ use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 use std::env;
 
+pub mod backend {
+    tonic::include_proto!("backend");
+}
+
 mod conversation;
 
 #[derive(Deserialize, Serialize)]
 struct Config {
+    backend_url: String,
     listen_channels: Vec<u64>,
 }
 
@@ -19,19 +24,23 @@ struct Handler {
     loaded_profile: String,
     profile: Mutex<conversation::Profile>,
     conversation: Mutex<conversation::Conversation>,
+    task_count: Mutex<usize>,
 }
 
 impl Handler {
-    fn new(
+    async fn new(
         config: Config,
         loaded_profile: String,
         profile: conversation::Profile,
     ) -> anyhow::Result<Self> {
         Ok(Self {
-            config,
             loaded_profile,
             profile: Mutex::new(profile.clone()),
-            conversation: Mutex::new(conversation::Conversation::new(profile)?),
+            conversation: Mutex::new(
+                conversation::Conversation::new(profile, &config.backend_url).await?,
+            ),
+            config,
+            task_count: Mutex::new(0),
         })
     }
 }
@@ -47,13 +56,17 @@ impl EventHandler for Handler {
         let response = match msg.content.as_str() {
             "!debug" => {
                 let profile = self.profile.lock().await;
+                let task_count = self.task_count.lock().await;
 
                 format!(
-                    "**Profile: {}**\n\nLoaded model: {}\n\nParameters:\nMinimum Token Count: {}\nMaximum Token Count: {}\nDo Sample: {}\nEarly Stopping: {}\nTop P Value: {}\nTop K Value: {}\nTemperature: {}\nRepititon Penalty: {}\nInverse Length Penalty: {}\nBeam Count: {}\nBeam Groups: {}\nReturn Sequence Count: {}\nNo Repeat NGram Size: {}",
+                    "**Profile: {}**\n**Backend: {}**\n**Tasks in queue: {}**\n\nLoaded model: {}\n\nParameters:\nMinimum Token Count: {}\nMaximum Token Count: {}\nToken Window Size: {}\nDo Sample: {}\nEarly Stopping: {}\nTop P Value: {}\nTop K Value: {}\nTemperature: {}\nRepititon Penalty: {}\nInverse Length Penalty: {}\nBeam Count: {}\nBeam Groups: {}\nReturn Sequence Count: {}\nNo Repeat NGram Size: {}",
                     profile.name,
+                    self.config.backend_url,
+                    task_count,
                     profile.model,
                     profile.min_length,
                     profile.max_length,
+                    profile.token_window,
                     profile.do_sample,
                     profile.early_stopping,
                     profile.top_p,
@@ -84,7 +97,7 @@ impl EventHandler for Handler {
 
                     *self.profile.lock().await = profile.clone();
 
-                    conversation.load_profile(profile)?;
+                    conversation.load_profile(profile);
 
                     Ok(())
                 })()
@@ -96,7 +109,10 @@ impl EventHandler for Handler {
                 }
             }
             _ if self.config.listen_channels.contains(&msg.channel_id.0) => {
-                let _ = msg.channel_id.broadcast_typing(&ctx.http).await;
+                {
+                    *self.task_count.lock().await += 1;
+                }
+                let typing = msg.channel_id.start_typing(&ctx.http);
 
                 let name = msg
                     .author_nick(&ctx.http)
@@ -106,7 +122,15 @@ impl EventHandler for Handler {
                 println!("{}: {}", name, msg.content);
 
                 let mut conversation = self.conversation.lock().await;
-                let response = conversation.query(&name, &msg.content);
+                let response = conversation.query(&name, &msg.content).await;
+
+                {
+                    *self.task_count.lock().await -= 1;
+                }
+
+                if let Ok(typing) = typing {
+                    let _ = typing.stop();
+                }
 
                 println!("-> {}", response);
 
@@ -142,8 +166,6 @@ struct Args {
 // Entry point of server
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    pyo3::prepare_freethreaded_python();
-
     // Command line parsing.
     let args = Args::parse();
 
@@ -165,7 +187,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Bot client
     let mut client = Client::builder(token, intents)
-        .event_handler(Handler::new(config, args.profile, profile)?)
+        .event_handler(Handler::new(config, args.profile, profile).await?)
         .await?;
 
     client.start().await?;

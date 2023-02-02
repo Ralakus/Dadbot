@@ -1,0 +1,29 @@
+syntax = "proto3";
+package backend;
+
+service Task {
+    rpc RunTask(TaskRequest) returns (TaskReply);
+}
+
+message TaskRequest {
+    string model = 1;
+    string input = 2;
+    int64 token_window = 3;
+    int64 min_length = 4;
+    int64 max_length = 5;
+    bool do_sample = 6;
+    bool early_stopping = 7;
+    double top_p = 8;
+    int64 top_k = 9;
+    double temperature = 10;
+    double repetition_penalty = 11;
+    double length_penalty = 12;
+    int64 num_beams = 13;
+    int64 num_beam_groups = 14;
+    int64 num_return_sequences = 15;
+    int64 no_repeat_ngram_size = 16;
+}
+
+message TaskReply {
+    repeated string data = 1;
+}

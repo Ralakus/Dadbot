@@ -22,7 +22,7 @@ regex = { version = "*", features = ["pattern"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tonic = "0.8"
-tokio = { version = "1.0", features = ["full"] }
+tokio = { version = "1.24", features = ["full"] }
 
 [build-dependencies]
 tonic-build = "0.8"

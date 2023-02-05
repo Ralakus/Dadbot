@@ -3,6 +3,8 @@ package backend;
 
 service Task {
     rpc RunTask(TaskRequest) returns (TaskReply);
+    rpc LoadModel(LoadModelRequest) returns (LoadModelReply);
+    rpc UnloadModel(LoadModelRequest) returns (LoadModelReply);
 }
 
 message TaskRequest {
@@ -26,4 +28,12 @@ message TaskRequest {
 
 message TaskReply {
     repeated string data = 1;
+}
+
+message LoadModelRequest {
+    string model = 1;
+}
+
+message LoadModelReply {
+    bool success = 1;
 }

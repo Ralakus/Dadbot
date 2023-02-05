@@ -5,6 +5,18 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Optional as _Op
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
+class LoadModelReply(_message.Message):
+    __slots__ = ["success"]
+    SUCCESS_FIELD_NUMBER: _ClassVar[int]
+    success: bool
+    def __init__(self, success: bool = ...) -> None: ...
+
+class LoadModelRequest(_message.Message):
+    __slots__ = ["model"]
+    MODEL_FIELD_NUMBER: _ClassVar[int]
+    model: str
+    def __init__(self, model: _Optional[str] = ...) -> None: ...
+
 class TaskReply(_message.Message):
     __slots__ = ["data"]
     DATA_FIELD_NUMBER: _ClassVar[int]

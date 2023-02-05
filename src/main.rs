@@ -84,7 +84,7 @@ impl EventHandler for Handler {
                 let mut conversation = self.conversation.lock().await;
                 conversation.history.clear();
 
-                println!("Conversation history cleared");
+                log::info!("Conversation history cleared");
 
                 "Conversation history cleared".to_string()
             }
@@ -102,10 +102,16 @@ impl EventHandler for Handler {
                     Ok(())
                 })()
                 .await;
-                println!("Attempt profile reload");
+
                 match result {
-                    Ok(_) => "Profile reloaded".to_string(),
-                    Err(e) => format!("Failed to reload profile: {}", e),
+                    Ok(_) => {
+                        log::info!("Profile reloaded");
+                        "Profile reloaded".to_string()
+                    }
+                    Err(e) => {
+                        log::error!("Failed to reload profile: {}", e);
+                        format!("Failed to reload profile: {}", e)
+                    }
                 }
             }
             _ if self.config.listen_channels.contains(&msg.channel_id.0) => {
@@ -119,7 +125,7 @@ impl EventHandler for Handler {
                     .await
                     .unwrap_or_else(|| msg.author.name.clone());
 
-                println!("{}: {}", name, msg.content);
+                log::info!("{}: {}", name, msg.content);
 
                 let mut conversation = self.conversation.lock().await;
                 let response = conversation.query(&name, &msg.content).await;
@@ -132,7 +138,7 @@ impl EventHandler for Handler {
                     let _ = typing.stop();
                 }
 
-                println!("-> {}", response);
+                log::info!("-> {}", response);
 
                 response
             }
@@ -140,13 +146,13 @@ impl EventHandler for Handler {
         };
 
         if let Err(e) = msg.reply(&ctx.http, response).await {
-            eprintln!("Failed to send message: {}", e);
+            log::error!("Failed to send message: {}", e);
         }
     }
 
     /// Function is called once upon startup after the bot is connected
     async fn ready(&self, _ctx: Context, ready: Ready) {
-        println!("{} ({}) is connected!", ready.user.name, ready.user.id);
+        log::info!("{} ({}) is connnected!", ready.user.name, ready.user.id);
     }
 }
 
@@ -166,6 +172,8 @@ struct Args {
 // Entry point of server
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    pretty_env_logger::init();
+
     // Command line parsing.
     let args = Args::parse();
 

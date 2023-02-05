@@ -1,10 +1,14 @@
+use std::str::FromStr;
+
+use http_body::combinators::UnsyncBoxBody;
+use hyper::{body::Bytes, client::HttpConnector, Client, Uri};
+use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use tonic::transport::Channel;
+use tonic::{Request, Status};
 
 use crate::backend::task_client::TaskClient;
 use crate::backend::TaskRequest;
-use tonic::Request;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Profile {
@@ -30,12 +34,20 @@ pub struct Profile {
 pub struct Conversation {
     profile: Profile,
     pub history: Vec<(String, String)>,
-    client: TaskClient<Channel>,
+    client: TaskClient<hyper::Client<HttpsConnector<HttpConnector>, UnsyncBoxBody<Bytes, Status>>>,
 }
 
 impl Conversation {
     pub async fn new(profile: Profile, backend_url: &str) -> anyhow::Result<Self> {
-        let client = TaskClient::connect(backend_url.to_string()).await?;
+        let connector = HttpsConnectorBuilder::new()
+            .with_native_roots()
+            .https_or_http()
+            .enable_http2()
+            .build();
+
+        let hyper_client = Client::builder().http2_only(true).build(connector);
+        let client = TaskClient::with_origin(hyper_client, Uri::from_str(backend_url)?);
+
         Ok(Self {
             profile,
             history: Vec::new(),
@@ -101,22 +113,26 @@ impl Conversation {
             self.profile.name
         );
 
-        let mut error = false;
-        let result = self
-            .generate(&input)
-            .await
-            .unwrap_or_else(|e| {
-                error = true;
-                vec![format!("Backend error: {}", e)]
-            })
-            .get(0)
-            .or_else(|| {
-                error = true;
-                None
-            })
-            .unwrap_or(&"Failure to generate at least one valid response".to_string())
-            .trim()
-            .to_string();
+        let mut iterations = 0;
+        let (error, result) = loop {
+            let (error, result) = self
+                .generate(&input)
+                .await
+                .map(|v| (false, v))
+                .unwrap_or_else(|e| (true, vec![format!("Backend error: {}", e)]));
+
+            match result.get(0) {
+                Some(response) => break (error, response.trim().to_string()),
+                None => {
+                    iterations += 1;
+                    if iterations > 5 {
+                        break (true, "Failed to generate valid response within 5 iterations".to_string())
+                    } else {
+                        continue;
+                    }
+                },
+            }
+        };
 
         if !error {
             self.history.push((name.to_string(), query.to_string()));

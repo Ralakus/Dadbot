@@ -19,12 +19,34 @@ class TaskStub(object):
                 request_serializer=backend__pb2.TaskRequest.SerializeToString,
                 response_deserializer=backend__pb2.TaskReply.FromString,
                 )
+        self.LoadModel = channel.unary_unary(
+                '/backend.Task/LoadModel',
+                request_serializer=backend__pb2.LoadModelRequest.SerializeToString,
+                response_deserializer=backend__pb2.LoadModelReply.FromString,
+                )
+        self.UnloadModel = channel.unary_unary(
+                '/backend.Task/UnloadModel',
+                request_serializer=backend__pb2.LoadModelRequest.SerializeToString,
+                response_deserializer=backend__pb2.LoadModelReply.FromString,
+                )
 
 
 class TaskServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def RunTask(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def LoadModel(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UnloadModel(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -37,6 +59,16 @@ def add_TaskServicer_to_server(servicer, server):
                     servicer.RunTask,
                     request_deserializer=backend__pb2.TaskRequest.FromString,
                     response_serializer=backend__pb2.TaskReply.SerializeToString,
+            ),
+            'LoadModel': grpc.unary_unary_rpc_method_handler(
+                    servicer.LoadModel,
+                    request_deserializer=backend__pb2.LoadModelRequest.FromString,
+                    response_serializer=backend__pb2.LoadModelReply.SerializeToString,
+            ),
+            'UnloadModel': grpc.unary_unary_rpc_method_handler(
+                    servicer.UnloadModel,
+                    request_deserializer=backend__pb2.LoadModelRequest.FromString,
+                    response_serializer=backend__pb2.LoadModelReply.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -62,5 +94,39 @@ class Task(object):
         return grpc.experimental.unary_unary(request, target, '/backend.Task/RunTask',
             backend__pb2.TaskRequest.SerializeToString,
             backend__pb2.TaskReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def LoadModel(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/backend.Task/LoadModel',
+            backend__pb2.LoadModelRequest.SerializeToString,
+            backend__pb2.LoadModelReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def UnloadModel(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/backend.Task/UnloadModel',
+            backend__pb2.LoadModelRequest.SerializeToString,
+            backend__pb2.LoadModelReply.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -1,3 +1,4 @@
 .vscode/
 target
 server/__pycache__
+res/ca.pem

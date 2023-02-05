@@ -54,9 +54,9 @@ class TaskRunner(backend_pb2_grpc.TaskServicer):
     ) -> backend_pb2.LoadModelReply:
 
         logging.info("Unloading %s" % request.model)
-        self._locks[request.model] = None
-        self._tokenizers[request.model] = None
-        self._models[request.model] = None
+        del self._locks[request.model]
+        del self._tokenizers[request.model]
+        del self._models[request.model]
 
         return backend_pb2.LoadModelReply(success=True)
 

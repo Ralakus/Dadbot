@@ -33,7 +33,7 @@ class TaskRunner(backend_pb2_grpc.TaskServicer):
         context: grpc.aio.ServicerContext
     ) -> backend_pb2.LoadModelReply:
 
-        if self._locks[request.model] == None:
+        if request.model not in self._locks:
             logging.info("Loading %s tokenizer" % request.model)
             self._tokenizers[request.model] = AutoTokenizer.from_pretrained(
                 request.model)
@@ -66,7 +66,7 @@ class TaskRunner(backend_pb2_grpc.TaskServicer):
         context: grpc.aio.ServicerContext
     ) -> backend_pb2.TaskReply:
 
-        if self._locks[request.model] == None:
+        if request.model not in self._locks:
             context.set_code(grpc.StatusCode.FAILED_PRECONDITION)
             context.set_details("Model not loaded")
             return backend_pb2.TaskReply()

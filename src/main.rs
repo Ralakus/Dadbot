@@ -1,8 +1,11 @@
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 use serenity::async_trait;
-use serenity::model::channel::Message;
-use serenity::model::gateway::Ready;
+use serenity::model::{
+    channel::Message,
+    gateway::{Activity, Ready},
+    user::OnlineStatus,
+};
 use serenity::prelude::*;
 use std::env;
 
@@ -151,8 +154,15 @@ impl EventHandler for Handler {
     }
 
     /// Function is called once upon startup after the bot is connected
-    async fn ready(&self, _ctx: Context, ready: Ready) {
+    async fn ready(&self, ctx: Context, ready: Ready) {
         log::info!("{} ({}) is connnected!", ready.user.name, ready.user.id);
+
+        let activity = Activity::listening("#talk-to-daddy");
+        let status = OnlineStatus::Online;
+
+        ctx.set_presence(Some(activity), status).await;
+
+        log::info!("Set status and activity");
     }
 }
 
